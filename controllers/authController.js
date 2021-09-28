@@ -51,8 +51,7 @@ exports.signupUser = (req, res, next) => {
         role: role,
         email: email,
         password: hashedPassword,
-        accountVerifyToken: token,
-        accountVerifyTokenExpiration: Date.now() + 3600000,
+        isVerified: true
       });
       return account.save();
     })
@@ -156,6 +155,7 @@ exports.login = (req, res, next) => {
 };
 
 exports.signupSeller = (req, res, next) => {
+  console.log('\n\n Log \n\n', req.body)
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -165,19 +165,13 @@ exports.signupSeller = (req, res, next) => {
     console.log(JSON.stringify(error));
     throw error;
   }
+  const role = 'ROLE_SELLER';
 
-  if (req.files.length == 0) {
-    const error = new Error("Upload an image as well.");
-    error.statusCode = 422;
-    throw error;
-  }
 
-  const arrayFiles = req.files.map((file) => file.path);
   const email = req.body.email;
   const name = req.body.name;
   const password = req.body.password;
   const tags = req.body.tags;
-  const role = req.body.role;
   const payment = req.body.payment;
   const paymentArray = payment.split(" ");
   const minOrderAmount = req.body.minOrderAmount;
@@ -190,16 +184,11 @@ exports.signupSeller = (req, res, next) => {
   const lng = req.body.lng;
   const locality = req.body.locality;
   const zip = req.body.zip;
+  const image = req.body.image;
 
   let token;
 
-  if (role !== "ROLE_SELLER") {
-    const error = new Error(
-      "Signing up a seller should have a role of ROLE_SELLER"
-    );
-    error.statusCode = 500;
-    throw error;
-  }
+
 
   bcrypt
     .hash(password, 12)
@@ -210,8 +199,7 @@ exports.signupSeller = (req, res, next) => {
         role: role,
         email: email,
         password: hashedPassword,
-        accountVerifyToken: token,
-        accountVerifyTokenExpiration: Date.now() + 3600000,
+        isVerified: true,
       });
       return account.save();
     })
@@ -219,7 +207,7 @@ exports.signupSeller = (req, res, next) => {
       const seller = new Seller({
         name: name,
         tags: tags,
-        imageUrl: arrayFiles,
+        imageUrl: image,
         minOrderAmount: minOrderAmount,
         costForOne: costForOne,
         account: savedAccount,
@@ -238,15 +226,6 @@ exports.signupSeller = (req, res, next) => {
       return seller.save();
     })
     .then((savedSeller) => {
-      transporter.sendMail({
-        to: email,
-        from: "YOUR_SENDGRID_VERIFIED_EMAIL",
-        subject: "Verify your Account on FoodHub",
-        html: `
-                      <p>Please verify your email by clicking on the link below - FoodHub</p>
-                      <p>Click this <a href="http://localhost:3002/auth/verify/${token}">link</a> to verify your account.</p>
-                    `,
-      });
       res.status(201).json({
         message:
           "Seller signed-up successfully, please verify your email before logging in.",

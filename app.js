@@ -43,6 +43,8 @@ const app = express();
 const upload = multer({ storage: fileStorage, fileFilter: fileFilter });
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 //set headers
