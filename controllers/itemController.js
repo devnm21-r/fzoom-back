@@ -16,13 +16,8 @@ exports.createItem = (req, res, next) => {
     throw error;
   }
 
-  if (!req.file) {
-    const error = new Error("Upload an image as well.");
-    error.statusCode = 422;
-    throw error;
-  }
 
-  const imageUrl = req.file.path;
+  const imageUrl = req.body.image;
   const title = req.body.title;
   const price = req.body.price;
   const tags = req.body.tags;
@@ -117,14 +112,7 @@ exports.editItem = (req, res, next) => {
   const price = req.body.price;
   const tags = req.body.tags;
   const description = req.body.description;
-
-  if (req.file) imageUrl = req.file.path;
-  if (!imageUrl) {
-    const error = new Error("Image was not found, try again.");
-    error.statusCode = 404;
-    throw error;
-  }
-
+  
   Item.findById(itemId)
     .then((fetchedItem) => {
       if (!fetchedItem) {
@@ -134,11 +122,7 @@ exports.editItem = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
-
-      if (imageUrl !== fetchedItem.imageUrl) {
-        clearImage(fetchedItem.imageUrl);
-      }
-
+      
       fetchedItem.title = title;
       fetchedItem.description = description;
       fetchedItem.price = price;
