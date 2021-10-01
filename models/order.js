@@ -55,6 +55,7 @@ const orderSchema = new Schema(
         ref: "Seller",
       },
     },
+    dateTime: Date,
   },
   { timestamps: true }
 );

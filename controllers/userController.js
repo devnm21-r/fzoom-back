@@ -171,13 +171,6 @@ exports.postAddress = (req, res, next) => {
   //   // Build your resulting errors however you want! String, object, whatever - it works!
   //   return `${param}: ${msg}`;
   // };
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation Failed, Incorrect data entered.");
-    error.statusCode = 422;
-    error.errors = errors.array();
-    throw error;
-  }
 
   const phoneNo = req.body.phoneNo;
   const street = req.body.street;
@@ -279,6 +272,7 @@ exports.getLoggedInUser = (req, res, next) => {
 exports.postOrder = (req, res, next) => {
   let accountObj;
   let userObj;
+  const { dateTime } = req.body;
   Account.findById(req.loggedInUserId)
     .then((account) => {
       accountObj = account;
@@ -317,6 +311,7 @@ exports.postOrder = (req, res, next) => {
               phone: seller.address.phoneNo,
               sellerId: seller,
             },
+            dateTime
           });
 
           order.save();
