@@ -272,7 +272,7 @@ exports.getLoggedInUser = (req, res, next) => {
 exports.postOrder = (req, res, next) => {
   let accountObj;
   let userObj;
-  const { dateTime } = req.body;
+  const { dateTime, phoneNo, reservedFor, orderType } = req.body;
   Account.findById(req.loggedInUserId)
     .then((account) => {
       accountObj = account;
@@ -303,6 +303,7 @@ exports.postOrder = (req, res, next) => {
               name: result.firstName,
               address: result.address,
               userId: result,
+              phoneNo,
             },
             items: items,
             status: "Placed",
@@ -311,7 +312,9 @@ exports.postOrder = (req, res, next) => {
               phone: seller.address.phoneNo,
               sellerId: seller,
             },
-            dateTime
+            dateTime,
+            orderType,
+            reservedFor: reservedFor ? Number(reservedFor) : null,
           });
 
           order.save();
@@ -419,7 +422,7 @@ exports.postOrderStatus = (req, res, next) => {
     error.statusCode = 404;
     throw error;
   }
-  const status = req.body.status;
+  const { status, rating, review } = req.body;
   Order.findById(orderId)
     .then((order) => {
       if (!order) {
@@ -429,7 +432,10 @@ exports.postOrderStatus = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
-
+      if (status === 'Rated') {
+        order.rating = rating;
+        order.review = review;
+      }
       order.status = status;
       return order.save();
     })
