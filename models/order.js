@@ -19,6 +19,7 @@ const orderSchema = new Schema(
         "Accepted",
         "Completed",
         "Out For Delivery",
+        "Rated"
       ],
     },
     user: {
@@ -39,6 +40,7 @@ const orderSchema = new Schema(
         required: true,
         ref: "User",
       },
+      phoneNo: String,
     },
     seller: {
       phone: {
@@ -56,6 +58,10 @@ const orderSchema = new Schema(
       },
     },
     dateTime: Date,
+    reservedFor: Number,
+    orderType: String,
+    rating: Number,
+    review: String
   },
   { timestamps: true }
 );
